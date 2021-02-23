@@ -450,29 +450,61 @@ leaflet(MplsStops) %>%
   
   16. Save the folder from moodle called Minneapolis_Neighborhoods into your project/repository folder for this assignment. Make sure the folder is called Minneapolis_Neighborhoods. Use the code below to read in the data and make sure to **delete the `eval=FALSE`**. Although it looks like it only links to the .sph file, you need the entire folder of files to create the `mpls_nbhd` data set. This data contains information about the geometries of the Minneapolis neighborhoods. Using the `mpls_nbhd` dataset as the base file, join the `mpls_suspicious` and `MplsDemo` datasets to it by neighborhood (careful, they are named different things in the different files). Call this new dataset `mpls_all`.
 
-```{r, eval=FALSE}
+```{r}
 mpls_nbhd <- st_read("Minneapolis_Neighborhoods/Minneapolis_Neighborhoods.shp", quiet = TRUE)
 ```
+
+
+```{r}
+MPLS_ALL <- mpls_nbhd %>% 
+  mutate(neighborhood = BDNAME) %>% 
+  left_join(mpls_suspicious, MplsDemo,
+            by = "neighborhood")
+```
+
 
   17. Use `leaflet` to create a map from the `mpls_all` data  that colors the neighborhoods by `prop_suspicious`. Display the neighborhood name as you scroll over it. Describe what you observe in the map.
   
 ```{r}
 
+pal <- colorNumeric("viridis",
+                    domain = MPLS_ALL$CountNeighbor) 
+  
+leaflet(MPLS_ALL) %>% 
+  addTiles() %>% 
+  addPolygons(fillColor = ~pal(CountNeighbor),
+              fillOpacity = 0.9)
 ```
   
   
-  18. Use `leaflet` to create a map of your own choosing. Come up with a question you want to try to answer and use the map to help answer that question. Describe what your map shows. 
+  18. Use `leaflet` to create a map of your own choosing. Come up with a question you want to try to answer and use the map to help answer that question. Describe what your map shows. <B>My mape shows the race of each driver pulled over by Minneapolis Police for each neighborhood, which the % of suspicious vegicles pulled over in color.</B>
   
 ```{r}
-leaflet(mpls_suspicious) %>% 
-  addTiles() %>% 
-  addMarkers(opacity = ~CountNeighbor)
+
+pal <- colorNumeric("magma",
+                    domain = MPLS_ALL$CountNeighbor) 
+  
+leaflet(MPLS_ALL) %>% 
+  addProviderTiles(providers$CartoDB.DarkMatter) %>% 
+  addPolygons(fillColor = ~pal(CountNeighbor),
+              color = "black",
+              stroke = 1,
+              fillOpacity = 0.4) %>% 
+  addCircles(data = MplsStops,
+             lng = ~long,
+             lat = ~lat,
+             color = "white",
+             stroke = FALSE,
+             weight = 0.2,
+             opacity = ~race)
 ```
   
   
 ## GitHub link
 
   19. Below, provide a link to your GitHub page with this set of Weekly Exercises. Specifically, if the name of the file is 04_exercises.Rmd, provide a link to the 04_exercises.md file, which is the one that will be most readable on GitHub.
+
+<B>https://github.com/Finn-Meachem/Finn_test_repo</B>
 
 
 **DID YOU REMEMBER TO UNCOMMENT THE OPTIONS AT THE TOP?**
